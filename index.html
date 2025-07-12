@@ -97,9 +97,9 @@
         }
         return read()
       }
-      let sumCash = 0
-      let sumAmount = 0
       const read = async () => {
+        let sumCash = 0
+        let sumAmount = 0
         const { data, error } = await client
           .from('sales')
           .select('*')
@@ -168,7 +168,7 @@
         <input type="hidden" name="amount" value="0" id="amount" />
         <div class="form-content">
           <div>수량</div>
-          <div class="col overflow-scroll d-flex gap-1">
+          <div class="col d-flex gap-1">
             <input
               type="button"
               value="1"
@@ -192,12 +192,6 @@
               value="4"
               class="btn btn-lg btn-primary"
               onclick="setAmount(4)"
-            />
-            <input
-              type="button"
-              value="5"
-              class="btn btn-lg btn-primary"
-              onclick="setAmount(5)"
             />
             <input
               type="button"
