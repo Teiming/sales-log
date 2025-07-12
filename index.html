@@ -65,17 +65,35 @@
   </head>
   <body>
     <script>
+      const params = new URLSearchParams(location.search)
+      const currentItem = Number(params.get('item'))
+      let price = 0
+      if (currentItem === 3) {
+        price = 3000
+      } else if (currentItem === 1 || currentItem === 2) {
+        price = 4000
+      } else {
+        location.search = '?item=1'
+      }
+      const setAmount = amount => {
+        document.querySelector('#amount').value = Number(amount)
+        document.querySelector('#cash').value = Number(amount) * price
+      }
+
       const insert = async (item, amount, cash) => {
         const { data, error } = await client
           .from('sales')
           .insert([{ item, amount, cash }])
         if (error) {
-          return false
+          alert('등록 실패')
         }
         return read()
       }
       const cancel = async id => {
         const { data, error } = await client.from('sales').delete().eq('id', id)
+        if (error) {
+          alert('삭제 실패')
+        }
         return read()
       }
       let sumCash = 0
@@ -84,10 +102,11 @@
         const { data, error } = await client
           .from('sales')
           .select('*')
+          .eq('item', currentItem)
           .order('created_at', { ascending: false })
 
         if (error) {
-          alert('error')
+          alert('조회 실패')
         }
         document.querySelector('#tbody').innerHTML = ''
         data.forEach(({ amount, cash, id }) => {
@@ -106,22 +125,34 @@
         document.querySelector('#sum-cash').innerHTML = sumCash
       }
       read()
-      const setAmount = amount => {
-        document.querySelector('#amount').value = Number(amount)
-        document.querySelector('#cash').value = Number(amount) * 4000
-      }
     </script>
     <main class="">
+      <h4 id="item-name" class="bg-light text-dark text-center pt-2">asdf</h4>
+      <!-- <hr /> -->
+      <script>
+        document.querySelector('#item-name').innerHTML =
+          currentItem === 1
+            ? '1층 옥수수'
+            : currentItem === 2
+            ? '2층 옥수수'
+            : '어묵'
+      </script>
       <table class="table table-striped text-center">
         <thead>
           <tr>
             <th>수량</th>
             <th>금액</th>
-            <th></th>
+            <th>기타</th>
           </tr>
         </thead>
-        <tbody id="tbody"></tbody>
-        <tfoot>
+        <tbody id="tbody">
+          <tr>
+            <td>0</td>
+            <td>00000</td>
+            <td>0</td>
+          </tr>
+        </tbody>
+        <tfoot class="table-group-divider">
           <tr class="text-light">
             <th id="sum-amount" style="background-color: #f849"></th>
             <th id="sum-cash" style="background-color: #f849"></th>
@@ -163,6 +194,12 @@
             />
             <input
               type="button"
+              value="4"
+              class="btn btn-lg btn-primary"
+              onclick="setAmount(5)"
+            />
+            <input
+              type="button"
               value="직접입력"
               class="btn btn-lg btn-primary"
               onclick="setAmount(Number(prompt('수량 입력(숫자만)')))"
@@ -192,7 +229,7 @@
           .querySelector('#footer-core')
           .addEventListener('submit', async e => {
             e.preventDefault()
-            insert(1, e.target.amount.value, e.target.cash.value)
+            insert(currentItem, e.target.amount.value, e.target.cash.value)
           })
       </script>
     </footer>
