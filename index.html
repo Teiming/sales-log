@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="viewport-fit=cover,width=device-width,user-scalable=no"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+      const client = supabase.createClient(
+        'https://clpxjpbrmjjpttvmkpwb.supabase.co',
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNscHhqcGJybWpqcHR0dm1rcHdiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTIzMjU2MTksImV4cCI6MjA2NzkwMTYxOX0.oXaiIiVrmORkGYmowaiYomsosIRcgYxhAPRcRW-YDpE'
+      )
+    </script>
+    <link rel="manifest" href="manifest.json" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css"
+    />
+    <style>
+      * {
+        word-break: keep-all;
+      }
+      :root {
+        background-color: black;
+      }
+      body {
+        max-width: 30rem;
+        background-color: white;
+        margin: auto;
+      }
+      footer {
+        position: fixed;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        form {
+          max-width: 30rem;
+          margin: auto;
+          background-color: #f84;
+          border-top-left-radius: 1rem;
+          border-top-right-radius: 1rem;
+        }
+      }
+      .form-content {
+        display: flex;
+        gap: 0.5rem;
+        height: 3rem;
+        div:first-child {
+          font-weight: bold;
+          text-align: center;
+          display: flex;
+          font-size: 150%;
+          align-items: center;
+          justify-content: center;
+          padding-left: 0.5rem;
+          padding-right: 0.5rem;
+          background-color: #fff3;
+          border-radius: 0.5rem;
+        }
+      }
+    </style>
+    <title>판매량 카운터</title>
+  </head>
+  <body>
+    <script>
+      const insert = async (item, amount, cash) => {
+        const { data, error } = await client
+          .from('sales')
+          .insert([{ item, amount, cash }])
+        if (error) {
+          return false
+        }
+        return read()
+      }
+      const cancel = async id => {
+        const { data, error } = await client.from('sales').delete().eq('id', id)
+        return read()
+      }
+      const read = async () => {
+        const { data, error } = await client
+          .from('sales')
+          .select('*')
+          .order('created_at', { ascending: false })
+
+        if (error) {
+          alert('error')
+        }
+        document.querySelector('#tbody').innerHTML = ''
+        data.forEach(element => {
+          document.querySelector('#tbody').innerHTML +=
+            '<tr><td>' +
+            element.amount +
+            '</td><td>' +
+            element.cash +
+            '</td><td><span class="btn btn-danger btn-sm" onclick="if (confirm(\'삭제 후 취소 불가\')) {cancel(' +
+            element.id +
+            ')}">X</span></td></tr>'
+        })
+      }
+      read()
+      const setAmount = amount => {
+        document.querySelector('#amount').value = Number(amount)
+        document.querySelector('#cash').value = Number(amount) * 4000
+      }
+    </script>
+    <main class="p-3">
+      <table class="table table-striped text-center">
+        <thead>
+          <tr>
+            <th>수량</th>
+            <th>금액</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </main>
+
+    <footer>
+      <form class="p-2 d-grid gap-2" id="footer-core">
+        <input type="hidden" name="amount" value="0" id="amount" />
+        <div class="form-content">
+          <div>수량</div>
+          <div class="col overflow-scroll d-flex gap-1">
+            <input
+              type="button"
+              value="1"
+              class="btn btn-lg btn-primary"
+              onclick="setAmount(1)"
+            />
+            <input
+              type="button"
+              value="2"
+              class="btn btn-lg btn-primary"
+              onclick="setAmount(2)"
+            />
+            <input
+              type="button"
+              value="3"
+              class="btn btn-lg btn-primary"
+              onclick="setAmount(3)"
+            />
+            <input
+              type="button"
+              value="4"
+              class="btn btn-lg btn-primary"
+              onclick="setAmount(4)"
+            />
+            <input
+              type="button"
+              value="직접입력"
+              class="btn btn-lg btn-primary"
+              onclick="setAmount(Number(prompt('수량 입력(숫자만)')))"
+            />
+          </div>
+        </div>
+        <div class="form-content">
+          <div>금액</div>
+          <div class="col d-flex">
+            <input
+              class="form-control"
+              type="number"
+              name="cash"
+              value="0"
+              id="cash"
+            />
+          </div>
+        </div>
+        <div class="d-grid">
+          <input type="submit" value="등록" class="btn btn-warning btn-lg" />
+        </div>
+      </form>
+      <script>
+        document
+          .querySelector('#footer-core')
+          .addEventListener('submit', async e => {
+            e.preventDefault()
+            insert(1, e.target.amount.value, e.target.cash.value)
+          })
+      </script>
+    </footer>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>
