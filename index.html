@@ -78,6 +78,8 @@
         const { data, error } = await client.from('sales').delete().eq('id', id)
         return read()
       }
+      let sumCash = 0
+      let sumAmount = 0
       const read = async () => {
         const { data, error } = await client
           .from('sales')
@@ -88,16 +90,20 @@
           alert('error')
         }
         document.querySelector('#tbody').innerHTML = ''
-        data.forEach(element => {
+        data.forEach(({ amount, cash, id }) => {
+          sumAmount += amount
+          sumCash += cash
           document.querySelector('#tbody').innerHTML +=
             '<tr><td>' +
-            element.amount +
+            amount +
             '</td><td>' +
-            element.cash +
+            cash +
             '</td><td><span class="btn btn-danger btn-sm" onclick="if (confirm(\'삭제 후 취소 불가\')) {cancel(' +
-            element.id +
+            id +
             ')}">X</span></td></tr>'
         })
+        document.querySelector('#sum-amount').innerHTML = sumAmount
+        document.querySelector('#sum-cash').innerHTML = sumCash
       }
       read()
       const setAmount = amount => {
@@ -105,7 +111,7 @@
         document.querySelector('#cash').value = Number(amount) * 4000
       }
     </script>
-    <main class="p-3">
+    <main class="">
       <table class="table table-striped text-center">
         <thead>
           <tr>
@@ -115,6 +121,13 @@
           </tr>
         </thead>
         <tbody id="tbody"></tbody>
+        <tfoot>
+          <tr class="text-light">
+            <th id="sum-amount" style="background-color: #f849"></th>
+            <th id="sum-cash" style="background-color: #f849"></th>
+            <th style="background-color: #f849"></th>
+          </tr>
+        </tfoot>
       </table>
     </main>
 
